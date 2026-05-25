@@ -41,7 +41,6 @@ import { AuthController } from './controllers/auth.controller';
     SessionRepository,
     AuditService,
     RedisService,
-    ConfigurationService,
     TokenService,
     PasswordService,
     RegistrationService,
