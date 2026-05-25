@@ -1,0 +1,14 @@
+{
+  "name": "rn-fido2",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "concurrently --names \"api,mobile\" --prefix \"[{name}]\" --color \"npm run start:api\" \"npm run start:mobile\"",
+    "start:api": "cd api && pnpm run start:dev",
+    "start:mobile": "cd mobile && npm run start:dev",
+    "install:all": "cd api && pnpm install && cd ../mobile && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0"
+  }
+}

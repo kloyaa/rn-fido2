@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import configuration from './config/configuration';
 import { getDatabaseConfig } from './config/database';
-import { ConfigurationService } from './config/configuration.service';
+import { ConfigurationModule } from './config/configuration.module';
 import { AuthModule } from './auth/auth.module';
 import { MetricsModule } from './metrics/metrics.module';
 import { AppController } from './app.controller';
@@ -15,6 +15,7 @@ import { RateLimitingMiddleware } from './auth/middleware/rate-limiting.middlewa
       isGlobal: true,
       load: [configuration],
     }),
+    ConfigurationModule,
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: getDatabaseConfig,
@@ -23,7 +24,7 @@ import { RateLimitingMiddleware } from './auth/middleware/rate-limiting.middlewa
     MetricsModule,
   ],
   controllers: [AppController],
-  providers: [ConfigurationService],
+  providers: [],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
