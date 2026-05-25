@@ -5,6 +5,15 @@
 **Status**: Draft  
 **Input**: User description: "Implement a production-grade authentication system that supports both traditional credential-based login and biometric authentication using FIDO/FIDO2 and WebAuthn standards."
 
+## Clarifications
+
+### Session 2026-05-25
+
+- Q: Should a biometric enrolled on one device be usable on another device? → A: Device-bound only. Platform biometrics (Face ID, Touch ID) are device-specific. Users can enroll the same platform independently on multiple devices if needed.
+- Q: What recovery mechanism exists if user loses all authenticators AND password? → A: Out of MVP scope. Support-assisted account recovery with proper identity verification is deferred to post-MVP.
+- Q: How should rate limiting prevent brute force attacks? → A: Dual strategy — per-account lockout (5 failed attempts → 15 minute lock) + per-IP throttling (10 failed attempts → progressive delays).
+- Q: What observability and monitoring capabilities should the system provide? → A: Audit logs (as specified) + structured metrics (event counts, failure rates, lockout triggers) for operational dashboarding. Manual alert configuration by ops team; predefined alerts deferred to post-MVP.
+
 ## User Scenarios
 
 <!--
@@ -38,17 +47,18 @@ New users must be able to create an account with email and password credentials.
 
 ### User Story 2 - Manual Credential Login (Priority: P1)
 
-Users must be able to authenticate using their email and password. This is the primary fallback authentication method and must be secure and reliable.
+Users must be able to authenticate using either their email or username combined with a password. This is the primary fallback authentication method and must be secure and reliable.
 
-**Why this priority**: Manual login is essential for users without biometric authenticators or those who lose access to their biometric devices. This must work consistently.
+**Why this priority**: Manual login is essential for users without biometric authenticators or those who lose access to their biometric devices. Supporting both email and username login provides flexibility and improves user experience.
 
-**Independent Test**: A registered user can log in with correct credentials and is redirected to the Home page. Login fails with clear error messages for incorrect credentials.
+**Independent Test**: A registered user can log in with either email or username (both provide access to the same account) and is redirected to the Home page. Login fails with clear error messages for incorrect credentials.
 
 **Acceptance Scenarios**:
 
-1. **Given** a registered user on the login page, **When** they enter correct email and password, **Then** they are authenticated and redirected to the Home page.
-2. **Given** a user entering incorrect password, **When** they submit the login, **Then** a clear error message is returned without revealing whether the email exists.
-3. **Given** a user attempting multiple failed logins, **When** they exceed the rate limit, **Then** the account is temporarily locked with clear guidance.
+1. **Given** a registered user on the login page, **When** they enter correct email (or username) and password, **Then** they are authenticated and redirected to the Home page.
+2. **Given** a user attempting to log in with username instead of email, **When** they submit the login with correct password, **Then** they are authenticated successfully.
+3. **Given** a user entering incorrect password, **When** they submit the login, **Then** a clear error message is returned without revealing whether the email/username exists.
+4. **Given** a user attempting multiple failed logins, **When** they exceed the rate limit, **Then** the account is temporarily locked with clear guidance.
 
 ---
 
@@ -145,53 +155,60 @@ Authenticated users must be able to log out from the application. This terminate
 ### Functional Requirements
 
 **Authentication & Registration**:
-- **FR-001**: System MUST allow new users to register with email and password
-- **FR-002**: System MUST validate email format and password strength during registration
+- **FR-001**: System MUST allow new users to register with email, optional username, and password
+- **FR-002**: System MUST validate email format, username format (alphanumeric + underscore, 3-20 chars), and password strength during registration
 - **FR-003**: System MUST prevent duplicate email registrations with clear error messaging
-- **FR-004**: System MUST allow registered users to log in with email and password
-- **FR-005**: System MUST implement rate limiting on login attempts to prevent brute force attacks
-- **FR-006**: System MUST return secure error messages that do not reveal account existence
+- **FR-004**: System MUST prevent duplicate username registrations (if username provided) with clear error messaging
+- **FR-005**: System MUST allow registered users to log in with EITHER email OR username combined with password
+- **FR-006**: System MUST implement rate limiting on login attempts to prevent brute force attacks using dual strategy: per-account lockout (after 5 failed attempts, lock for 15 minutes) AND per-IP throttling (after 10 failed attempts from same IP in 1 hour, apply progressive response delays)
+- **FR-007**: System MUST return secure error messages that do not reveal account existence
 
 **FIDO2/WebAuthn Support**:
-- **FR-007**: System MUST implement FIDO2 registration ceremony following official W3C WebAuthn standards
-- **FR-008**: System MUST validate attestation from enrolled authenticators to ensure device legitimacy
-- **FR-009**: System MUST implement FIDO2 authentication ceremony with challenge generation and verification
-- **FR-010**: System MUST prevent replay attacks by validating challenge freshness and origin
-- **FR-011**: System MUST support multiple enrolled authenticators per user
-- **FR-012**: System MUST allow users to enroll, view, and revoke biometric authenticators from Settings
+- **FR-008**: System MUST implement FIDO2 registration ceremony following official W3C WebAuthn standards
+- **FR-009**: System MUST validate attestation from enrolled authenticators to ensure device legitimacy
+- **FR-010**: System MUST implement FIDO2 authentication ceremony with challenge generation and verification
+- **FR-011**: System MUST prevent replay attacks by validating challenge freshness and origin
+- **FR-012**: System MUST support multiple enrolled authenticators per user
+- **FR-013**: System MUST allow users to enroll, view, and revoke biometric authenticators from Settings
 
 **Password Management**:
-- **FR-013**: System MUST allow authenticated users to change their password
-- **FR-014**: System MUST validate new password meets security requirements
-- **FR-015**: System MUST require current password verification before allowing password change
-- **FR-016**: System MUST invalidate sessions upon password change
+- **FR-014**: System MUST allow authenticated users to change their password
+- **FR-015**: System MUST validate new password meets security requirements
+- **FR-016**: System MUST require current password verification before allowing password change
+- **FR-017**: System MUST invalidate sessions upon password change
 
 **Session & Token Management**:
-- **FR-017**: System MUST implement secure session tokens with appropriate expiration
-- **FR-018**: System MUST support token refresh to extend user sessions
-- **FR-019**: System MUST invalidate all sessions when authenticator is disabled
-- **FR-020**: System MUST implement secure token storage with HttpOnly and Secure cookies
+- **FR-018**: System MUST implement secure session tokens with appropriate expiration
+- **FR-019**: System MUST support token refresh to extend user sessions
+- **FR-020**: System MUST invalidate all sessions when authenticator is disabled
+- **FR-021**: System MUST implement secure token storage with HttpOnly and Secure cookies
 
 **Audit Logging**:
-- **FR-021**: System MUST log all registration attempts with timestamp, email, and result (success/failure)
-- **FR-022**: System MUST log all login attempts (manual and biometric) with timestamp, user identifier, IP address, and result
-- **FR-023**: System MUST log all password changes with timestamp, user identifier, and IP address
-- **FR-024**: System MUST log all biometric enrollment and revocation events with timestamp, user, authenticator info, and result
-- **FR-025**: System MUST log all logout events with timestamp and user identifier
-- **FR-026**: System MUST log all session-related events (creation, invalidation, timeout)
-- **FR-027**: System MUST log all security-related failures (rate limit triggers, failed attestation, replay attack attempts)
+- **FR-022**: System MUST log all registration attempts with timestamp, email, username (if provided), and result (success/failure)
+- **FR-023**: System MUST log all login attempts (manual and biometric) with timestamp, user identifier (email or username), IP address, and result
+- **FR-024**: System MUST log all password changes with timestamp, user identifier, and IP address
+- **FR-025**: System MUST log all biometric enrollment and revocation events with timestamp, user, authenticator info, and result
+- **FR-026**: System MUST log all logout events with timestamp and user identifier
+- **FR-027**: System MUST log all session-related events (creation, invalidation, timeout)
+- **FR-028**: System MUST log all security-related failures (rate limit triggers, failed attestation, replay attack attempts)
+
+**Observability & Metrics**:
+- **FR-029**: System MUST emit structured metrics: total authentication requests, successful/failed login counts (per method), account lockout events, FIDO2 ceremony failures, session timeouts
+- **FR-030**: System MUST expose metrics in a queryable format (JSON API endpoint or Prometheus-compatible format) for integration with operational monitoring/dashboarding systems
+- **FR-031**: System MUST provide operational visibility into authentication health without requiring manual log parsing
 
 **User Interface & Settings**:
-- **FR-028**: System MUST display Home page only to authenticated users
-- **FR-029**: System MUST display Settings page with authentication management options
-- **FR-030**: System MUST display clear navigation for logout functionality
-- **FR-031**: System MUST display error messages that guide users without exposing sensitive system details
+- **FR-032**: System MUST display Home page only to authenticated users
+- **FR-033**: System MUST display Settings page with authentication management options
+- **FR-034**: System MUST display clear navigation for logout functionality
+- **FR-035**: System MUST display error messages that guide users without exposing sensitive system details
 
 ### Key Entities
 
 **User**:
 - User ID (unique identifier)
 - Email (unique)
+- Username (unique, optional - 3-20 alphanumeric + underscore characters)
 - Password hash (bcrypt/Argon2)
 - Account creation timestamp
 - Last login timestamp
@@ -241,6 +258,7 @@ Authenticated users must be able to log out from the application. This terminate
 - **SC-008**: System handles 1,000 concurrent users without performance degradation
 - **SC-009**: Error messages guide users to resolution without revealing sensitive system details or account information
 - **SC-010**: Password reset flow (when implemented) follows OWASP secure password reset guidelines
+- **SC-011**: Rate limiting prevents brute force attacks: per-account lockout triggers after 5 failed attempts (15 minute duration), per-IP throttling triggers after 10 failures in 1 hour
 
 ## Assumptions
 
@@ -248,11 +266,14 @@ Authenticated users must be able to log out from the application. This terminate
 - **Session Duration**: User sessions MUST expire after 24 hours of creation or 1 hour of inactivity (user-friendly enterprise defaults).
 - **Authenticator Support**: System assumes FIDO2-compliant devices including hardware keys (YubiKey, etc.) and platform authenticators (Windows Hello, Face ID, Touch ID).
 - **Network Connectivity**: FIDO2 ceremony requires active internet connection for challenge verification and attestation validation.
-- **Device Binding**: Authenticators are bound to their enrollment device (cross-device sharing is out of scope for MVP).
+- **Device Binding**: Authenticators are bound to their enrollment device; platform biometrics (Face ID, Touch ID) are device-specific and cannot be shared across devices. Users can enroll the same platform independently on multiple devices (each enrollment is separate). Cross-device authenticator sharing is out of scope for MVP.
+- **Account Recovery**: No self-service account recovery in MVP. If user loses all biometric authenticators AND forgets password, account recovery requires support team intervention with identity verification. Post-MVP can add email-based or security-question-based recovery.
 - **Audit Log Retention**: Logs are retained for minimum 90 days for compliance and investigation purposes (configurable per deployment).
 - **IP Address Capture**: System captures client IP for audit logging and rate limiting (proxy scenarios will show proxy IP).
 - **Password Reset**: Self-service password reset functionality is out of MVP scope; users can authenticate with fallback password and re-enroll biometric authenticators.
 - **Single Email per Account**: One email address maps to one account; account linking or federation is out of scope for MVP.
+- **Username is Optional**: Users may provide a username during registration; email alone is sufficient to create an account. If username is provided, it must be unique and between 3-20 characters (alphanumeric + underscore). Both email and username can be used for login if username was provided.
+- **Login Identifier**: Users can log in with either email or username (if username provided); system treats them as equivalent identifiers for the same account.
 - **UTC Timestamps**: All timestamps stored in UTC for consistency across distributed systems and audit compliance.
 - **Frontend Deployment**: Frontend (mobile app) runs on Expo with secure credential storage via platform-native APIs (Keychain on iOS, Keystore on Android).
 - **Backend Deployment**: Backend runs on NestJS with PostgreSQL and Redis, deployed in production environment with TLS 1.3+ and modern security practices.
