@@ -195,7 +195,7 @@ Authenticated users must be able to log out from the application. This terminate
 **Observability & Metrics**:
 - **FR-029**: System MUST emit structured metrics: total authentication requests, successful/failed login counts (per method), account lockout events, FIDO2 ceremony failures, session timeouts
 - **FR-030**: System MUST expose metrics in a queryable format (JSON API endpoint or Prometheus-compatible format) for integration with operational monitoring/dashboarding systems
-- **FR-031**: System MUST provide operational visibility into authentication health without requiring manual log parsing
+- **FR-031**: System MUST provide operational visibility into authentication health without requiring manual log parsing (expose real-time metrics: successful login rate, failed login rate, account lockout events, FIDO2 ceremony failure rate, session timeout events via metrics endpoint or Prometheus exporter)
 
 **User Interface & Settings**:
 - **FR-032**: System MUST display Home page only to authenticated users

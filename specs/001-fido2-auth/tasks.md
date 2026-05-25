@@ -50,7 +50,7 @@
 - [ ] T018 [P] Create rate limiting middleware in `/api/src/auth/middleware/rate-limiting.middleware.ts` (per-account + per-IP)
 - [ ] T019 Create JWT guard in `/api/src/auth/guards/jwt.guard.ts`
 - [ ] T020 [P] Create authenticated decorator in `/api/src/auth/decorators/authenticated.decorator.ts`
-- [ ] T021 Create global exception filter in `/api/src/common/filters/http-exception.filter.ts`
+- [ ] T021 Create global exception filter in `/api/src/common/filters/http-exception.filter.ts` (sanitize error responses: remove stack traces, secrets, internal details; return only safe error codes and messages per FR-007)
 - [ ] T022 [P] Setup API response interceptor in `/api/src/common/interceptors/response.interceptor.ts`
 - [ ] T023 Create validation pipe for DTOs in `/api/src/common/pipes/validation.pipe.ts`
 - [ ] T024 Setup health check endpoint (GET `/`) in `/api/src/app.controller.ts` for AWS ALB
@@ -366,6 +366,7 @@
 - [ ] T210 [P] Verify Tailwind CSS responsive design across mobile screens
 - [ ] T211 [P] Code cleanup and consistency check (naming, structure, comments)
 - [ ] T212 Run quickstart.md first-run workflow validation (setup through E2E scenarios)
+- [ ] T213a [P] Implement metrics API endpoint in `/api/src/metrics/metrics.controller.ts` with GET `/metrics` returning JSON: {total_auth_requests, successful_logins, failed_logins, lockout_events, fido2_failures, session_timeouts} for operational monitoring and dashboarding (per FR-030, FR-031)
 - [ ] T213 [P] Final constitution compliance review (all principles verified in code)
 
 ---
