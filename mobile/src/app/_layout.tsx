@@ -1,15 +1,40 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+import React, { useEffect } from 'react';
+import { Slot, useRouter, useSegments } from 'expo-router';
 import { useColorScheme } from 'react-native';
+import { useAuthStore } from '../stores/authStore';
+import { ErrorBoundary } from '../components/common/ErrorBoundary';
+import { LoadingSpinner } from '../components/common/LoadingSpinner';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+function AuthGuard() {
+  const { isAuthenticated, isLoading, initialize } = useAuthStore();
+  const segments = useSegments();
+  const router = useRouter();
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const inAuthGroup = segments[0] === '(auth)';
+
+    if (!isAuthenticated && !inAuthGroup) {
+      router.replace('/(auth)/login');
+    } else if (isAuthenticated && inAuthGroup) {
+      router.replace('/(app)');
+    }
+  }, [isAuthenticated, isLoading, segments, router]);
+
+  if (isLoading) return <LoadingSpinner message="Loading..." />;
+
+  return <Slot />;
+}
+
+export default function RootLayout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <ErrorBoundary>
+      <AuthGuard />
+    </ErrorBoundary>
   );
 }

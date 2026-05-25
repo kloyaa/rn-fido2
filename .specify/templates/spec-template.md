@@ -5,7 +5,7 @@
 **Status**: Draft  
 **Input**: User description: "$ARGUMENTS"
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios*
 
 <!--
   IMPORTANT: User stories should be PRIORITIZED as user journeys ordered by importance.

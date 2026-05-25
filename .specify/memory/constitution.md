@@ -1,50 +1,123 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+SYNC IMPACT REPORT
+Version: 0.0.0 → 1.0.0 (MINOR: initial constitution establishment)
+Rationale: First constitution for rn-fido2 project focusing on FIDO2 authentication.
+
+New principles:
+- I. FIDO2-First Security
+- II. Enterprise-Grade Architecture  
+- III. No Testing Implementations
+- IV. Documentation-Driven Development
+- V. Frontend/Backend Contract Alignment
+
+New sections:
+- Frontend Architecture Requirements
+- Backend Architecture Requirements
+- Security Standards & Compliance
+
+Templates updated: plan-template, spec-template, tasks-template
+Follow-up: None
+-->
+
+# rn-fido2 Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. FIDO2-First Security
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+All authentication flows MUST fully comply with FIDO2/WebAuthn standards and best practices. Every authentication mechanism—manual login, biometric login, WebAuthn registration, device verification—must implement industry-standard security protocols, challenge verification, attestation validation, and replay attack prevention. Security is non-negotiable and takes absolute priority over convenience.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+**Rationale**: FIDO2 is the gold standard for passwordless, phishing-resistant authentication. Strict compliance ensures enterprise-grade security posture and protects against the largest class of authentication vulnerabilities.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### II. Enterprise-Grade Architecture
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+Backend (NestJS) and frontend (Expo) MUST follow production-grade architectural patterns: strict typing, validation layers, proper separation of concerns, error handling, and audit logging. Every module, service, controller, screen, and component must be independently maintainable and scalable. No shortcuts, temporary hacks, or simplified implementations are permitted.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+**Rationale**: This system handles sensitive authentication data. Enterprise architecture patterns ensure security, maintainability, and long-term scalability without requiring refactoring after deployment.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### III. No Testing Implementations
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+Do NOT write, generate, or configure ANY form of tests, test frameworks, or testing utilities. This includes unit tests, integration tests, end-to-end tests, mock scaffolding, or test-related dependencies. Testing is explicitly excluded from the development lifecycle.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+**Rationale**: Testing is deferred to later phases. Focus development effort on correct, secure, working implementation.
+
+### IV. Documentation-Driven Development
+
+Every implemented feature, flow, endpoint, payload, security consideration, and architectural decision MUST be properly documented and continuously updated throughout development. Documentation is a first-class artifact, not an afterthought. Incomplete or outdated documentation is a code quality issue.
+
+**Rationale**: FIDO2 is complex. Documentation enables code review, security audits, and future maintenance. It also serves as a reference for integrations and compliance verification.
+
+### V. Frontend/Backend Contract Alignment
+
+All frontend-backend communication MUST follow strictly defined API contracts with typed payloads, clear request/response schemas, validation rules, and error responses. Frontend and backend must never negotiate or adapt on-the-fly. Breaking changes require explicit, documented migration.
+
+**Rationale**: Type safety and contract enforcement prevent integration bugs, security misconfigurations, and inconsistent authentication state.
+
+## Frontend Architecture Requirements
+
+- **Framework**: React Native (Expo) with TypeScript
+- **Styling**: Tailwind CSS with consistent design patterns
+- **Folder Structure**: components, screens, hooks, services/api, stores, utilities, types, constants, authentication modules
+- **State Management**: Type-safe, centralized state for authentication and session
+- **Storage**: Secure credential and token storage (platform-native secure storage)
+- **Authentication Flows**:
+  - Manual login (username/password fallback with rate limiting)
+  - Biometric login (native biometric APIs)
+  - FIDO2/WebAuthn registration and authentication
+  - Session management with token refresh
+  - Logout with device revocation
+- **Error Handling**: Explicit error states, security-aware UX, clear messaging
+- **Accessibility**: WCAG 2.1 AA minimum compliance
+
+## Backend Architecture Requirements
+
+- **Framework**: NestJS with modular domain architecture
+- **Database**: PostgreSQL with TypeORM for data persistence
+- **Cache/Session**: Redis for session management, challenge storage, rate limiting
+- **Typing**: Strict TypeScript, no `any` types in critical authentication paths
+- **Validation**: DTOs, validation pipes, input sanitization at all boundaries
+- **Guards & Interceptors**: Authentication/authorization guards, request logging, exception handling
+- **FIDO2 Implementation**:
+  - Registration ceremony with attestation verification
+  - Authentication ceremony with challenge verification
+  - Authenticator trust management
+  - Device revocation and session invalidation
+- **Security Requirements**:
+  - CSRF and XSS protection
+  - Secure cookie handling (HttpOnly, Secure, SameSite flags)
+  - Rate limiting on authentication endpoints
+  - Audit logging for all auth events
+  - Token rotation and expiration
+- **API Clarity**: Documented endpoint contracts with request payloads, response schemas, validation rules, and error codes
+- **Database Design**: Properly structured migrations, foreign keys, indexes, constraints
+
+## Security Standards & Compliance
+
+- All cryptographic operations MUST use industry-standard libraries (libsodium, node:crypto, native mobile APIs)
+- Challenge generation and verification MUST prevent replay attacks
+- Device fingerprinting and authenticator binding MUST be implemented
+- Session invalidation MUST revoke all device access
+- Audit logs MUST record all authentication attempts (success and failure)
+- Rate limiting MUST protect against brute force attacks
+- No plaintext secrets in code, configuration, or logs
+- Environment variables MUST be validated and typed
+- All sensitive data MUST be encrypted at rest and in transit (TLS 1.3+)
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution is the source of truth for rn-fido2 project governance. All architectural decisions, code reviews, and PRs MUST verify compliance with these principles.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Amendment Process**: Constitution changes require explicit ratification. Changes to security principles require additional security review.
+
+**Versioning**: 
+- MAJOR: Backward-incompatible principle removals or redefinitions
+- MINOR: New principles, new sections, or materially expanded guidance
+- PATCH: Clarifications, wording, typo fixes
+
+**Compliance Verification**: Every PR review MUST ask:
+1. Does this follow the architecture principles?
+2. Is security properly considered (FIDO2 standards, validation, audit logging)?
+3. Is documentation updated to reflect the change?
+4. Are frontend/backend contracts aligned?
+
+**Version**: 1.0.0 | **Ratified**: 2026-05-25 | **Last Amended**: 2026-05-25
