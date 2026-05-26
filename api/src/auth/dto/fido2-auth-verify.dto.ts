@@ -1,10 +1,12 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsObject } from 'class-validator';
 
 export class AuthenticationVerifyRequestDto {
   @IsString()
   @IsNotEmpty()
   challengeId!: string;
 
+  @IsObject()
+  @IsNotEmpty()
   credential!: Record<string, unknown>;
 }
 

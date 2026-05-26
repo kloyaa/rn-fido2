@@ -23,6 +23,7 @@ async function bootstrap() {
 
   await app.listen(port, host);
   console.log(`Application running on ${host}:${port}`);
+  console.log(`FIDO2 rpId: ${config.fido2RpId} | origin: ${config.fido2Origin}`);
 }
 
 bootstrap();
