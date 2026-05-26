@@ -25,6 +25,10 @@ export const ERROR_MESSAGES: Record<string, string> = {
   AUTHENTICATOR_ALREADY_REVOKED: 'This authenticator has already been disabled.',
   ACCESS_DENIED: 'You do not have permission to perform this action.',
 
+  // Device capability
+  PLATFORM_NOT_SUPPORTED: 'Biometric enrollment is not yet supported on this device.',
+  CEREMONY_CANCELLED: 'Biometric prompt was dismissed. Please try again.',
+
   // Network
   NETWORK_ERROR: 'Unable to reach the server. Check your connection.',
   UNKNOWN_ERROR: 'An unexpected error occurred. Please try again.',

@@ -1,10 +1,6 @@
 import { Platform } from 'react-native';
+import { create } from 'react-native-passkeys';
 
-// React Native does not have native WebAuthn/FIDO2 support via the browser API.
-// On mobile, FIDO2 ceremonies are mediated through the platform credential manager.
-// This module provides a thin wrapper that calls the platform API.
-// For full production support, integrate a library such as `react-native-passkeys`
-// or use the Expo passkeys API when available for your target SDK.
 
 export interface RegistrationCredential {
   id: string;
@@ -21,7 +17,6 @@ export async function performEnrollmentCeremony(
   options: Record<string, unknown>,
 ): Promise<RegistrationCredential> {
   if (Platform.OS === 'web') {
-    // Web: use navigator.credentials.create
     const credential = await (navigator.credentials as CredentialsContainer).create({
       publicKey: options as unknown as PublicKeyCredentialCreationOptions,
     }) as PublicKeyCredential;
@@ -38,6 +33,12 @@ export async function performEnrollmentCeremony(
     };
   }
 
-  // Native: placeholder — integrate platform-specific FIDO2 SDK here
-  throw new Error('FIDO2 enrollment is not yet supported on this platform. Use the web version or integrate a native FIDO2 SDK.');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result = await create(options as any);
+  if (!result) {
+    const e = new Error('Passkey creation was cancelled.');
+    e.name = 'CEREMONY_CANCELLED';
+    throw e;
+  }
+  return result as unknown as RegistrationCredential;
 }

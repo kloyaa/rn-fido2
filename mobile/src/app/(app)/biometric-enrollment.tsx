@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useColorScheme } from 'react-native';
 import { Stack } from 'expo-router';
@@ -14,7 +14,7 @@ export default function BiometricEnrollmentScreen() {
   const scheme = (useColorScheme() ?? 'light') as 'light' | 'dark';
   const colors = Colors[scheme];
   const router = useRouter();
-  const { enroll, isLoading, error, clearError } = useEnrollment();
+  const { enroll, isLoading, error, errorCode, clearError } = useEnrollment();
 
   const [deviceName, setDeviceName] = useState('');
   const [success, setSuccess] = useState(false);
@@ -23,6 +23,8 @@ export default function BiometricEnrollmentScreen() {
     const ok = await enroll(deviceName.trim() || undefined);
     if (ok) setSuccess(true);
   }
+
+  const isPlatformNotSupported = errorCode === 'PLATFORM_NOT_SUPPORTED';
 
   return (
     <>
@@ -40,19 +42,42 @@ export default function BiometricEnrollmentScreen() {
               using your device's biometrics (Face ID, Touch ID, or fingerprint).
             </Text>
 
-            {error && <ErrorAlert message={error} onDismiss={clearError} />}
+            {isPlatformNotSupported ? (
+              <View style={[styles.callout, { backgroundColor: colors.backgroundElement, borderColor: colors.backgroundSelected }]}>
+                <Text style={[styles.calloutTitle, { color: colors.text }]}>Biometrics not available</Text>
+                <Text style={[styles.calloutBody, { color: colors.textSecondary }]}>
+                  Make sure Face ID, Touch ID, or a fingerprint is set up in your device settings before enabling this feature.
+                </Text>
+                <Button
+                  title="Open Device Settings"
+                  onPress={() => { clearError(); Linking.openSettings(); }}
+                  style={styles.calloutButton}
+                />
+                <Button
+                  title="Try Again"
+                  onPress={() => { clearError(); handleEnroll(); }}
+                  isLoading={isLoading}
+                  style={styles.calloutButton}
+                />
+              </View>
+            ) : (
+              error && <ErrorAlert message={error} onDismiss={clearError} />
+            )}
 
-            <DeviceNameInput
-              value={deviceName}
-              onChangeText={setDeviceName}
-            />
-
-            <Button
-              title={isLoading ? 'Starting enrollment...' : 'Enable biometrics'}
-              onPress={handleEnroll}
-              isLoading={isLoading}
-              style={styles.button}
-            />
+            {!isPlatformNotSupported && (
+              <>
+                <DeviceNameInput
+                  value={deviceName}
+                  onChangeText={setDeviceName}
+                />
+                <Button
+                  title={isLoading ? 'Starting enrollment...' : 'Enable biometrics'}
+                  onPress={handleEnroll}
+                  isLoading={isLoading}
+                  style={styles.button}
+                />
+              </>
+            )}
           </>
         )}
       </ScrollView>
@@ -65,4 +90,8 @@ const styles = StyleSheet.create({
   description: { fontSize: 15, lineHeight: 22, marginBottom: 28 },
   successContainer: { gap: 12 },
   button: { marginTop: 8 },
+  callout: { borderRadius: 12, borderWidth: 1, padding: 16, gap: 8, marginBottom: 16 },
+  calloutTitle: { fontSize: 16, fontWeight: '600' },
+  calloutBody: { fontSize: 14, lineHeight: 20 },
+  calloutButton: { marginTop: 4 },
 });

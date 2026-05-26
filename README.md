@@ -37,6 +37,13 @@ npm run start:mobile
 
 Launches the Expo development server on port 8081. Useful for mobile UI development.
 
+#### Configure for Physical Device (Local Network)
+```bash
+npm run setup:network
+```
+
+Detects your machine's local IP and configures both API and mobile for physical device connection. Run this once before `npm start` when testing on a physical device. Re-run whenever your IP changes (e.g., after reconnecting to WiFi).
+
 #### Install All Dependencies
 ```bash
 npm run install:all

@@ -8,12 +8,14 @@ import { AuthModule } from './auth/auth.module';
 import { MetricsModule } from './metrics/metrics.module';
 import { AppController } from './app.controller';
 import { RateLimitingMiddleware } from './auth/middleware/rate-limiting.middleware';
+import { WellKnownModule } from './well-known/well-known.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
+      envFilePath: ['.env.local', '.env'],
     }),
     ConfigurationModule,
     TypeOrmModule.forRootAsync({
@@ -22,6 +24,7 @@ import { RateLimitingMiddleware } from './auth/middleware/rate-limiting.middlewa
     }),
     AuthModule,
     MetricsModule,
+    WellKnownModule,
   ],
   controllers: [AppController],
   providers: [],
