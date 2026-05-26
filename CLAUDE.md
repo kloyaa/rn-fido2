@@ -27,4 +27,4 @@ All development MUST follow the **rn-fido2 Constitution** (`.specify/memory/cons
 
 ## For Additional Context
 
-For technical planning, implementation details, and design artifacts, refer to the current plan in `.specify/memory/plan.md`.
+For technical planning, implementation details, and design artifacts, refer to the current plan in `specs/003-local-network-dev/plan.md`.

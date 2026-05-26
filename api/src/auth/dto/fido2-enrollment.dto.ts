@@ -1,4 +1,4 @@
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsObject, IsNotEmpty } from 'class-validator';
 
 export class EnrollmentStartRequestDto {
   @IsOptional()
@@ -15,6 +15,8 @@ export class EnrollmentVerifyRequestDto {
   @IsString()
   challengeId!: string;
 
+  @IsObject()
+  @IsNotEmpty()
   credential!: Record<string, unknown>;
 
   @IsOptional()

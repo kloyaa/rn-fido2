@@ -32,6 +32,14 @@ function isChallengeData(v: Record<string, unknown>): v is ChallengeData {
   return typeof v.challenge === 'string' && typeof v.userId === 'string';
 }
 
+// Android passkeys embed apk-key-hash as origin instead of the HTTPS URL
+function toAndroidOrigins(sha256Fingerprints: string[]): string[] {
+  return sha256Fingerprints.map((fp) => {
+    const hash = Buffer.from(fp.replace(/:/g, ''), 'hex').toString('base64url');
+    return `android:apk-key-hash:${hash}`;
+  });
+}
+
 @Injectable()
 export class Fido2Service {
   constructor(
@@ -60,7 +68,8 @@ export class Fido2Service {
         type: 'public-key' as const,
       })),
       authenticatorSelection: {
-        residentKey: 'preferred',
+        authenticatorAttachment: 'platform',
+        residentKey: 'required',
         userVerification: 'required',
       },
     });
@@ -92,10 +101,11 @@ export class Fido2Service {
 
     let verification;
     try {
+      const androidOrigins = toAndroidOrigins(this.configService.androidSha256Fingerprints);
       verification = await verifyRegistrationResponse({
         response: credential,
         expectedChallenge: raw.challenge,
-        expectedOrigin: this.configService.fido2Origin,
+        expectedOrigin: [this.configService.fido2Origin, ...androidOrigins],
         expectedRPID: this.configService.fido2RpId,
         requireUserVerification: true,
       });
@@ -181,10 +191,11 @@ export class Fido2Service {
 
     let verification;
     try {
+      const androidOrigins = toAndroidOrigins(this.configService.androidSha256Fingerprints);
       verification = await verifyAuthenticationResponse({
         response: credential,
         expectedChallenge: raw.challenge,
-        expectedOrigin: this.configService.fido2Origin,
+        expectedOrigin: [this.configService.fido2Origin, ...androidOrigins],
         expectedRPID: this.configService.fido2RpId,
         credential: {
           id: credential.id,

@@ -1,6 +1,7 @@
 export default () => ({
   app: {
     port: parseInt(process.env.APP_PORT ?? '3000', 10),
+    host: process.env.APP_HOST ?? 'localhost',
     name: process.env.APP_NAME ?? 'fido2-auth-api',
     nodeEnv: process.env.NODE_ENV ?? 'development',
     logLevel: process.env.LOG_LEVEL ?? 'debug',
@@ -27,6 +28,13 @@ export default () => ({
     rpId: process.env.RP_ID ?? 'localhost',
     rpName: process.env.RP_NAME ?? 'FIDO2 Auth Service',
     origin: process.env.ORIGIN ?? 'http://localhost:3000',
+  },
+  android: {
+    packageName: process.env.ANDROID_PACKAGE_NAME ?? 'com.niksxu.mobile',
+    sha256Fingerprints: (process.env.ANDROID_SHA256_FINGERPRINTS ?? '')
+      .split(',')
+      .map((f) => f.trim())
+      .filter(Boolean),
   },
   rateLimit: {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS ?? '3600000', 10),

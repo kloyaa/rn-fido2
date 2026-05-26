@@ -9,6 +9,10 @@ export class ConfigurationService {
     return this.config.get<number>('app.port')!;
   }
 
+  get appHost(): string {
+    return this.config.get<string>('app.host')!;
+  }
+
   get appName(): string {
     return this.config.get<string>('app.name')!;
   }
@@ -43,6 +47,10 @@ export class ConfigurationService {
   get fido2RpId(): string { return this.config.get<string>('fido2.rpId')!; }
   get fido2RpName(): string { return this.config.get<string>('fido2.rpName')!; }
   get fido2Origin(): string { return this.config.get<string>('fido2.origin')!; }
+
+  // Android
+  get androidPackageName(): string { return this.config.get<string>('android.packageName')!; }
+  get androidSha256Fingerprints(): string[] { return this.config.get<string[]>('android.sha256Fingerprints')!; }
 
   // Rate Limiting
   get rateLimitWindowMs(): number { return this.config.get<number>('rateLimit.windowMs')!; }

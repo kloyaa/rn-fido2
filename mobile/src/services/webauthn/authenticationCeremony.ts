@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { get } from 'react-native-passkeys';
 
 export interface AssertionCredential {
   id: string;
@@ -38,6 +39,12 @@ export async function performAuthenticationCeremony(
     };
   }
 
-  // Native: placeholder — integrate platform-specific FIDO2 SDK here
-  throw new Error('FIDO2 authentication is not yet supported on this platform. Use the web version or integrate a native FIDO2 SDK.');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result = await get(options as any);
+  if (!result) {
+    const e = new Error('Passkey authentication was cancelled.');
+    e.name = 'CEREMONY_CANCELLED';
+    throw e;
+  }
+  return result as unknown as AssertionCredential;
 }

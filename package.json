@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "concurrently --names \"api,mobile\" --prefix \"[{name}]\" --color \"npm run start:api\" \"npm run start:mobile\"",
+    "start": "node -e \"const fs=require('fs');if(!fs.existsSync('mobile/.env.local'))console.warn('[warn] EXPO_PUBLIC_API_URL not set. Run npm run setup:network for physical device support.');\" && concurrently --names \"api,mobile\" --prefix \"[{name}]\" --color \"npm run start:api\" \"npm run start:mobile\"",
     "start:api": "cd api && pnpm run start:dev",
     "start:mobile": "cd mobile && npm run start:dev",
-    "install:all": "cd api && pnpm install && cd ../mobile && npm install"
+    "install:all": "cd api && pnpm install && cd ../mobile && npm install",
+    "setup:network": "node scripts/setup-network.js"
   },
   "devDependencies": {
     "concurrently": "^8.0.0"
